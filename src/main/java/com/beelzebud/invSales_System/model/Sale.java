@@ -21,7 +21,6 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "sales")
-@Data
 @Getter
 @Setter
 @NoArgsConstructor
@@ -50,5 +49,6 @@ public class Sale {
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal total;
+
 
 }

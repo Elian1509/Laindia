@@ -29,6 +29,7 @@ public class GlobalExceptionHandler {
                 )
         );
     }
+//Mal commit
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {

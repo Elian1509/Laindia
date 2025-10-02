@@ -1,24 +1,30 @@
 package com.beelzebud.invSales_System.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
+    public ResponseEntity<Map<String, Object>> handleResourceNotFound(
+        ResourceNotFoundException ex,
+        HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 Map.of(
                         "type", "about:blank",
                         "title", "Recurso no encontrado",
                         "status", 404,
-                        "errors", List.of(Map.of("detail", ex.getMessage())),
+                        "detail", ex.getMessage(),
+                        "instance", request.getRequestURI(),
                         "timestamp", LocalDateTime.now()
                 )
         );
@@ -29,8 +35,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 Map.of(
                         "type", "about:blank",
-                        "title", "Recurso no encontrado",
-                        "status", 404,
+                        "title", "Error interno del servidor",
+                        "status", 500,
                         "errors", List.of(Map.of("detail", ex.getMessage())),
                         "timestamp", LocalDateTime.now()
                 )

@@ -117,7 +117,33 @@ Ejemplo body:
 - `GET /api/reports/daily/csv?date=2025-10-01` → CSV.  
 - `GET /api/reports/daily/pdf?date=2025-10-01` → PDF.  
 
+<<<<<<< HEAD
 
+=======
+---
+
+## Script SQL inicial
+Archivo `script.sql` (ejemplo):
+
+```sql
+INSERT INTO roles (id, name) VALUES (1, 'ADMIN'), (2, 'CASHIER');
+
+INSERT INTO users (id, username, password, role_id, created_at)
+VALUES
+  (1, 'admin', '$2a$10$8dDgEjYv8yZwN7Mwk...', 1, NOW()),
+  (2, 'cajero', '$2a$10$8dDgEjYv8yZwN7Mwk...', 2, NOW());
+
+-- Productos iniciales
+INSERT INTO products (sku, name, description, price, stock, created_at)
+VALUES
+  ('SKU-001', 'Coca Cola 1.5L', 'Bebida gaseosa', 5000, 100, NOW()),
+  ('SKU-002', 'Arroz Diana 5kg', 'Bolsa de arroz', 45000, 50, NOW());
+```
+
+*(Las contraseñas deben ir encriptadas con BCrypt, en este ejemplo estan recortadas por simplicidad).*
+
+---
+>>>>>>> origin/main
 
 ## Ejemplo de reporte JSON
 ```json

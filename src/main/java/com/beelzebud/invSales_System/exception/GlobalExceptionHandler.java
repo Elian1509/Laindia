@@ -16,8 +16,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleResourceNotFound(
-        ResourceNotFoundException ex,
-        HttpServletRequest request) {
+            ResourceNotFoundException ex,
+            HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 Map.of(
                         "type", "about:blank",
@@ -25,11 +25,9 @@ public class GlobalExceptionHandler {
                         "status", 404,
                         "detail", ex.getMessage(),
                         "instance", request.getRequestURI(),
-                        "timestamp", LocalDateTime.now()
-                )
-        );
+                        "timestamp", LocalDateTime.now()));
     }
-//Mal commit
+    // Mal commit
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
@@ -39,8 +37,20 @@ public class GlobalExceptionHandler {
                         "title", "Error interno del servidor",
                         "status", 500,
                         "errors", List.of(Map.of("detail", ex.getMessage())),
-                        "timestamp", LocalDateTime.now()
-                )
-        );
+                        "timestamp", LocalDateTime.now()));
     }
+
+    @ExceptionHandler(StockException.class)
+    public ResponseEntity<Map<String, Object>> handleStockException(StockException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                Map.of(
+                        "type", "about:blank",
+                        "title", "Error en stock",
+                        "status", 400,
+                        "errors", ex.getErrors().stream()
+                                .map(err -> Map.of("detail", err))
+                                .toList(),
+                        "timestamp", LocalDateTime.now()));
+    }
+
 }

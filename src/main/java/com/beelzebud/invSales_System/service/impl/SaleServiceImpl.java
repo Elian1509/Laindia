@@ -14,6 +14,7 @@ import com.beelzebud.invSales_System.dto.request.SaleRequestDTO;
 import com.beelzebud.invSales_System.dto.response.SaleItemResponseDTO;
 import com.beelzebud.invSales_System.dto.response.SaleResponseDTO;
 import com.beelzebud.invSales_System.exception.ResourceNotFoundException;
+import com.beelzebud.invSales_System.exception.StockException;
 import com.beelzebud.invSales_System.model.Product;
 import com.beelzebud.invSales_System.model.Sale;
 import com.beelzebud.invSales_System.model.SaleItem;
@@ -30,80 +31,88 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SaleServiceImpl implements SaleService {
 
-    private final SaleRepository saleRepository;
-    private final SaleItemRepository saleItemRepository;
-    private final ProductRepository productRepository;
-    private final UserRepository userRepository;
+        private final SaleRepository saleRepository;
+        private final SaleItemRepository saleItemRepository;
+        private final ProductRepository productRepository;
+        private final UserRepository userRepository;
 
-    @Override
-    @Transactional
-    public SaleResponseDTO registerSale(SaleRequestDTO request) {
-        // Validar usuario
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+        @Override
+        @Transactional
+        public SaleResponseDTO registerSale(SaleRequestDTO request) {
 
-        // Crear cabecera de la venta
-        Sale sale = Sale.builder()
-                .transactionNumber(UUID.randomUUID())
-                .user(user)
-                .createdAt(LocalDateTime.now())
-                .total(BigDecimal.ZERO)
-                .build();
-        sale = saleRepository.save(sale);
+                List<String> stockErrors = new ArrayList<>();
+                List<SaleItemResponseDTO> itemResponses = new ArrayList<>();
+                BigDecimal total = BigDecimal.ZERO;
+                List<SaleItem> saleItems = new ArrayList<>();
 
-        List<SaleItemResponseDTO> itemResponses = new ArrayList<>();
-        BigDecimal total = BigDecimal.ZERO;
+                // Validar usuario
+                User user = userRepository.findById(request.getUserId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
-        // recorre los items
-        for (SaleItemRequestDTO itemReq : request.getItems()) {
-            Product product = productRepository.findById(itemReq.getProductId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
+                // Crear cabecera de la venta
+                Sale sale = Sale.builder()
+                                .transactionNumber(UUID.randomUUID())
+                                .user(user)
+                                .createdAt(LocalDateTime.now())
+                                .total(BigDecimal.ZERO)
+                                .build();
+                sale = saleRepository.save(sale);
 
-            if (product.getStock() < itemReq.getQuantity()) {
-                throw new RuntimeException("Stock insuficiente para " + product.getName());
-            }
+                // recorre los items
+                for (SaleItemRequestDTO itemReq : request.getItems()) {
+                        Product product = productRepository.findById(itemReq.getProductId())
+                                        .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 
-            // Reducir stock
-            product.setStock(product.getStock() - itemReq.getQuantity());
-            productRepository.save(product);
+                        if (product.getStock() < itemReq.getQuantity()) {
+                                stockErrors.add("El producto: " + product.getName()
+                                                + " no tiene stock suficiente. Stock actual: " + product.getStock());
+                                continue;
+                        }
 
-            // Calcular subtotal
-            BigDecimal subTotal = product.getPrice().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                        // Reducir stock
+                        product.setStock(product.getStock() - itemReq.getQuantity());
+                        productRepository.save(product);
 
-            // Crear saleItem
-            SaleItem saleItem = SaleItem.builder()
-                    .sale(sale)
-                    .product(product)
-                    .quantity(itemReq.getQuantity())
-                    .priceUnit(product.getPrice())
-                    .subTotal(subTotal)
-                    .build();
-            saleItemRepository.save(saleItem);
+                        // Calcular subtotal
+                        BigDecimal subTotal = product.getPrice().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
 
-            // Acumular total
-            total = total.add(subTotal);
+                        // Crear saleItem
+                        SaleItem saleItem = SaleItem.builder()
+                                        .sale(sale)
+                                        .product(product)
+                                        .quantity(itemReq.getQuantity())
+                                        .priceUnit(product.getPrice())
+                                        .subTotal(subTotal)
+                                        .build();
+                        saleItemRepository.save(saleItem);
 
-            // Armar respuesta
-            itemResponses.add(
-                    SaleItemResponseDTO.builder()
-                            .productName(product.getName())
-                            .quantity(itemReq.getQuantity())
-                            .priceUnit(product.getPrice())
-                            .subTotal(subTotal)
-                            .build()
-            );
+                        // Acumular total
+                        total = total.add(subTotal);
+
+                        // Armar respuesta
+                        itemResponses.add(
+                                        SaleItemResponseDTO.builder()
+                                                        .productName(product.getName())
+                                                        .quantity(itemReq.getQuantity())
+                                                        .priceUnit(product.getPrice())
+                                                        .subTotal(subTotal)
+                                                        .build());
+                }
+
+                if (!stockErrors.isEmpty()) {
+                        throw new StockException(stockErrors);
+                }
+
+                // Actualizar total de la venta
+                sale.setTotal(total);
+                saleRepository.save(sale);
+
+                // Devolver DTO de respuesta
+                return SaleResponseDTO.builder()
+                                .transactionNumber(sale.getTransactionNumber())
+                                .createdAt(sale.getCreatedAt())
+                                .total(sale.getTotal())
+                                .items(itemResponses)
+                                .build();
         }
-
-        //  Actualizar total de la venta
-        sale.setTotal(total);
-        saleRepository.save(sale);
-
-        // Devolver DTO de respuesta
-        return SaleResponseDTO.builder()
-                .transactionNumber(sale.getTransactionNumber())
-                .createdAt(sale.getCreatedAt())
-                .total(sale.getTotal())
-                .items(itemResponses)
-                .build();
-    }
 }

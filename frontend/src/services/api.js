@@ -1,5 +1,7 @@
 const API_URL = "http://localhost:8080/api";
 
+// Auth
+
 export async function login(username, password) {
   const res = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
@@ -10,21 +12,41 @@ export async function login(username, password) {
   const data = await res.json();
 
   localStorage.setItem("token", data.token);
-  localStorage.setItem("role", data.role);
+
+  const payload = JSON.parse(atob(data.token.split(".")[1]));
+  localStorage.setItem("role", payload.role);
 
   return data;
 }
 
+export async function logout() {
+  const res = await fetch(`${API_URL}/auth/logout`, {
+    method: "POST",
+    headers: { ...getAuthHeaders() },
+  });
+  localStorage.removeItem("token");
+  localStorage.setItem("role");
+  if (!res.ok) throw new Error("Error al cerrar sesion");
+}
 export function getAuthHeaders() {
   const token = localStorage.getItem("token");
   return { Authorization: `Bearer ${token}` };
 }
 
+// Productos
 export async function getProducts() {
   const res = await fetch(`${API_URL}/products`, {
     headers: { ...getAuthHeaders() },
   });
   if (!res.ok) throw new Error("Error al obtener productos");
+  return res.json();
+}
+
+export async function getProductById(id) {
+  const res = await fetch(`${API_URL}/products/${id}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  if (!res.ok) throw new Error("Error al obtener producto");
   return res.json();
 }
 
@@ -58,3 +80,19 @@ export async function updateProduct(product) {
   }
   return res.json();
 }
+
+// ventas
+
+export async function registerSale(saleData) {
+  const res = await fetch(`${API_URL}/sales`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+    body: JSON.stringify(saleData),
+  });
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Error al registrar venta: ${error}`);
+  }
+  return res.json();
+}
+

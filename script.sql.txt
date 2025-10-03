@@ -1,0 +1,45 @@
+-- ============================================
+-- Script inicial: roles, usuarios (BCrypt), productos
+-- ============================================
+
+-- Roles
+INSERT INTO roles (name) VALUES ('ADMIN') ON CONFLICT (name) DO NOTHING;
+INSERT INTO roles (name) VALUES ('CASHIER') ON CONFLICT (name) DO NOTHING;
+
+-- Users (REPLACE password hashes con los hashes BCrypt generados)
+-- Genera los hashes con el helper Java que te doy en el README o abajo.
+INSERT INTO users (username, password, role_id, created_at)
+VALUES
+  ('admin', 'REPLACE_WITH_ADMIN_HASH', (SELECT id FROM roles WHERE name='ADMIN'), NOW())
+ON CONFLICT (username) DO NOTHING;
+
+INSERT INTO users (username, password, role_id, created_at)
+VALUES
+  ('cajero1', 'REPLACE_WITH_CASHIER_HASH', (SELECT id FROM roles WHERE name='CASHIER'), NOW())
+ON CONFLICT (username) DO NOTHING;
+
+-- Productos de ejemplo
+INSERT INTO products (sku, name, description, price, stock, created_at) VALUES
+('P001','Manzanas','Manzanas rojas frescas',2500,100,NOW()),
+('P002','Bananas','Bananas maduras',1800,150,NOW()),
+('P003','Leche Entera','Bolsa de 1 litro',3200,50,NOW())
+ON CONFLICT (sku) DO NOTHING;
+
+-- Tabla para registrar intentos de login (si no la tienes ya)
+CREATE TABLE IF NOT EXISTS login_attempts (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(100),
+  success BOOLEAN NOT NULL,
+  ip VARCHAR(50),
+  user_agent TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla para tokens revocados (logout)
+CREATE TABLE IF NOT EXISTS revoked_tokens (
+  id SERIAL PRIMARY KEY,
+  token TEXT NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_revoked_token_token ON revoked_tokens(token);

@@ -43,7 +43,6 @@ public class SaleServiceImpl implements SaleService {
                 List<String> stockErrors = new ArrayList<>();
                 List<SaleItemResponseDTO> itemResponses = new ArrayList<>();
                 BigDecimal total = BigDecimal.ZERO;
-                List<SaleItem> saleItems = new ArrayList<>();
 
                 // Validar usuario
                 User user = userRepository.findById(request.getUserId())

@@ -23,7 +23,7 @@ Sistema de Inventario, Ventas y Reportes desarrollado con **Spring Boot 3, Postg
    - Registro de ventas.  
    - Validacion de stock.  
    - Generacion de `transactionNumber` unico.  
-   - Calculo automático de totales.  
+   - Calculo automatico de totales.  
 
 3. **Reportes**  
    - Reporte diario en **JSON**.  
@@ -55,11 +55,11 @@ spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 
 
-### 3. Ejecutar aplicación
+### 3. Ejecutar aplicacion
 mvn spring-boot:run
 
 
-La app estará disponible en: http://localhost:8080
+La app estara disponible en: http://localhost:8080
 
 ---
 
@@ -119,7 +119,7 @@ Ejemplo body:
 
 ---
 
-## 🗄️ Script SQL inicial
+## Script SQL inicial
 Archivo `script.sql` (ejemplo):
 
 ```sql
@@ -137,11 +137,11 @@ VALUES
   ('SKU-002', 'Arroz Diana 5kg', 'Bolsa de arroz', 45000, 50, NOW());
 ```
 
-*(Las contraseñas deben ir encriptadas con BCrypt, en este ejemplo están recortadas por simplicidad).*
+*(Las contraseñas deben ir encriptadas con BCrypt, en este ejemplo estan recortadas por simplicidad).*
 
 ---
 
-## 📊 Ejemplo de reporte JSON
+## Ejemplo de reporte JSON
 ```json
 {
   "date": "2025-10-01",
@@ -156,19 +156,19 @@ VALUES
 
 ---
 
-## 👥 Roles
-- **ADMIN** → acceso a todos los módulos.  
+## Roles
+- **ADMIN** → acceso a todos los modulos.  
 - **CASHIER** → acceso solo a ventas y consulta de inventario.  
 
 ---
 
-## 📝 Notas
+## Notas
 - El proyecto incluye DTOs para requests/responses.  
 - Manejo de errores estandarizado con `GlobalExceptionHandler`.  
-- Reportes implementados bajo estándar **RFC 9457** para respuestas de error.  
+- Reportes implementados bajo estandar **RFC 9457** para respuestas de error.  
 
 ---
 
-# ✅ Estado actual
+# Estado actual
 - Backend completo (productos, ventas, reportes, seguridad).  
 - Pendiente: Frontend en React + Tailwind.  

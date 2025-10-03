@@ -2,7 +2,6 @@ package com.beelzebud.invSales_System.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
@@ -12,13 +11,12 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    
     private final Key key = Keys.hmacShaKeyFor("tuClaveSecretaDeAlMenos32Caracteres".getBytes());
 
-    // 1 hora 
+    // 1 hora
     private final long EXPIRATION_TIME = 1000 * 60 * 60;
 
-    // Genera token con rol 
+    // Genera token con rol
     public String generateToken(String username, String role) {
         return Jwts.builder()
                 .subject(username)
@@ -49,10 +47,15 @@ public class JwtUtil {
     }
 
     private Claims getAllClaims(String token) {
-        return Jwts.parser()  
-                .setSigningKey(key)   
+        return Jwts.parser()
+                .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public java.time.Instant extractExpirationInstant(String token) {
+        Date expiration = getAllClaims(token).getExpiration();
+        return expiration.toInstant();
     }
 }

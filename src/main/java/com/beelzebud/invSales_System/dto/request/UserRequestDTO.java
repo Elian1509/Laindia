@@ -1,5 +1,6 @@
 package com.beelzebud.invSales_System.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LoginRequestDTO {
+public class UserRequestDTO {
+    @NotBlank
     private String username;
+    @NotBlank
     private String password;
+    @NotBlank
+    private String role;
+
 }

@@ -1,0 +1,25 @@
+
+-- Insertar roles
+
+INSERT INTO roles (name) VALUES
+('ADMIN'),
+('CASHIER');
+
+
+-- Insertar usuarios de prueba
+-- (La contraseña aquí es en texto plano, luego en Spring Boot
+-- se usará encriptada con BCrypt)
+
+INSERT INTO users (username, password, role_id) VALUES
+('admin', 'admin123', 1),  -- Rol ADMIN
+('cajero1', 'cajero123', 2); -- Rol CASHIER
+
+
+-- Insertar productos de ejemplo
+
+INSERT INTO products (sku, name, description, price, stock) VALUES
+('P001', 'Manzanas', 'Manzanas rojas frescas', 2500, 100),
+('P002', 'Bananas', 'Bananas maduras', 1800, 150),
+('P003', 'Leche Entera', 'Bolsa de 1 litro', 3200, 50),
+('P004', 'Pan Integral', 'Paquete 10 tajadas', 4200, 80),
+('P005', 'Huevos AA', 'Cubeta de 30 unidades', 12000, 40);

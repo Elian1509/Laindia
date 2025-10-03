@@ -1,0 +1,88 @@
+
+-- Script inicial BD: Inventario y Ventas
+
+
+-- Eliminamos si existen para evitar conflictos (solo en desarrollo)
+DROP TABLE IF EXISTS sale_items CASCADE;
+DROP TABLE IF EXISTS sales CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS roles CASCADE;
+
+
+-- Tabla de roles
+
+CREATE TABLE roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
+);
+
+
+-- Tabla de usuarios
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role_id INT NOT NULL REFERENCES roles(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- Tabla de productos
+
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    sku VARCHAR(50) UNIQUE NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    description TEXT,
+    price NUMERIC(10,2) NOT NULL CHECK (price >= 0),
+    stock INT NOT NULL CHECK (stock >= 0),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- Tabla de ventas
+
+CREATE TABLE sales (
+    id SERIAL PRIMARY KEY,
+    transaction_number UUID DEFAULT gen_random_uuid(),
+    user_id INT NOT NULL REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    total NUMERIC(12,2) NOT NULL CHECK (total >= 0)
+);
+
+
+-- Tabla de detalle de ventas
+
+CREATE TABLE sale_items (
+    id SERIAL PRIMARY KEY,
+    sale_id INT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+    product_id INT NOT NULL REFERENCES products(id),
+    quantity INT NOT NULL CHECK (quantity > 0),
+    price_unit NUMERIC(10,2) NOT NULL CHECK (price_unit >= 0),
+    subtotal NUMERIC(12,2) NOT NULL CHECK (subtotal >= 0)
+);
+
+
+-- Tabla para registrar intentos de login 
+
+CREATE TABLE IF NOT EXISTS login_attempts (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(100),
+  success BOOLEAN NOT NULL,
+  ip VARCHAR(50),
+  user_agent TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+`
+-- Tabla para tokens revocados (logout)
+
+CREATE TABLE IF NOT EXISTS revoked_tokens (
+  id SERIAL PRIMARY KEY,
+  token TEXT NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_revoked_token_token ON revoked_tokens(token);

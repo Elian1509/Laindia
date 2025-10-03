@@ -6,19 +6,31 @@ export default function Login({ onLogin }) {
   const [password, setPass] = useState("");
   const [error, setError] = useState("");
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    try {
-      const data = await login(username, password);
-      console.log("Respuesta del back:", data)
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-      onLogin(data.role);
-    } catch (err){
-      console.error(err);
-      setError("Credenciales inválidas");
+async function handleSubmit(e) {
+  e.preventDefault();
+  try {
+    const data = await login(username, password);
+    
+    // Decodificar el token para obtener el rol
+    const token = data.token;
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const role = payload.role;
+
+    
+
+    if (role) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
+      onLogin(role);
+    } else {
+      console.error("No se encontró el rol en el token");
+      setError("Error al obtener el rol del usuario");
     }
+  } catch (err) {
+    console.error("Error durante el login:", err);
+    setError("Error de autenticación: " + err.message);
   }
+}
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">

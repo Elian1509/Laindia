@@ -44,15 +44,24 @@ git clone https://github.com/Elian1509/Laindia.git
 cd Laindia
 
 ### 2. Configurar base de datos
-Crea una base de datos en PostgreSQL: CREATE DATABASE Laindia;
+Crea una base de datos en PostgreSQL;
 
-Configura `application.properties`:
-properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/invsales
+# Puerto
+server.port=8080
+# Config DB PostgreSQL
+# Bd laindia en oficina o laindiaalmuerzos en casa
+spring.datasource.url=jdbc:postgresql://localhost:5432/LaindiaAlmuerzos 
+# spring.datasource.url=jdbc:postgresql://localhost:5432/Laindia 
 spring.datasource.username=postgres
-spring.datasource.password=tu_password
-spring.jpa.hibernate.ddl-auto=update
+spring.datasource.password=1927
+# Driver
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# JPA / Hibernate
+spring.jpa.hibernate.ddl-auto=none
 spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
 
 
 ### 3. Ejecutar aplicacion
@@ -117,33 +126,6 @@ Ejemplo body:
 - `GET /api/reports/daily/csv?date=2025-10-01` → CSV.  
 - `GET /api/reports/daily/pdf?date=2025-10-01` → PDF.  
 
-<<<<<<< HEAD
-
-=======
----
-
-## Script SQL inicial
-Archivo `script.sql` (ejemplo):
-
-```sql
-INSERT INTO roles (id, name) VALUES (1, 'ADMIN'), (2, 'CASHIER');
-
-INSERT INTO users (id, username, password, role_id, created_at)
-VALUES
-  (1, 'admin', '$2a$10$8dDgEjYv8yZwN7Mwk...', 1, NOW()),
-  (2, 'cajero', '$2a$10$8dDgEjYv8yZwN7Mwk...', 2, NOW());
-
--- Productos iniciales
-INSERT INTO products (sku, name, description, price, stock, created_at)
-VALUES
-  ('SKU-001', 'Coca Cola 1.5L', 'Bebida gaseosa', 5000, 100, NOW()),
-  ('SKU-002', 'Arroz Diana 5kg', 'Bolsa de arroz', 45000, 50, NOW());
-```
-
-*(Las contraseñas deben ir encriptadas con BCrypt, en este ejemplo estan recortadas por simplicidad).*
-
----
->>>>>>> origin/main
 
 ## Ejemplo de reporte JSON
 ```json

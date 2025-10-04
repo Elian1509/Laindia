@@ -1,196 +1,346 @@
-InvSales System - Prueba Técnica
+# InvSales System - Prueba Técnica Playtech
 
-Sistema de Inventario, Ventas y Reportes desarrollado como parte de la prueba técnica de Playtech.
+Sistema de **Inventario, Ventas y Reportes** desarrollado como entrega de la prueba técnica.
+Backend con **Spring Boot + PostgreSQL + JWT** y frontend con **React + Vite + TailwindCSS**.
 
-Incluye:
+---
 
-Backend: Spring Boot 3, PostgreSQL, JWT Security.
+## 📌 Resumen
 
-Frontend: React + Vite + TailwindCSS.
+InvSales cubre:
 
-Autenticación y Roles: ADMIN y CASHIER.
+* Gestión de productos (CRUD).
+* Punto de venta (registro de ventas, validación de stock, `transactionNumber` único).
+* Reportes diarios (JSON / CSV / PDF).
+* Seguridad con JWT y roles (`ADMIN`, `CASHIER`).
 
-🚀 Tecnologías utilizadas
-Backend
+---
 
-Java 21
+## 🧰 Tecnologías principales
 
-Spring Boot 3.5.6
+**Backend**
 
-Spring Data JPA
+* Java 21
+* Spring Boot 3.5.x
+* Spring Data JPA
+* Spring Security + JWT
+* PostgreSQL
+* Maven
+* OpenPDF (PDF export)
 
-Spring Security + JWT
+**Frontend**
 
-PostgreSQL
+* React 18 (Vite)
+* TailwindCSS (v3 compatible)
+* Axios
 
-Maven
+---
 
-OpenPDF (para exportar reportes en PDF)
+## 📂 Estructura recomendada (resumen)
 
-Frontend
 
-React 18 + Vite
+/ (repo)
+ ├─ backend/ (Spring Boot app)
+ ├─ frontend/ (React + Vite)
+ │   ├─ public/
+ │   │   └─ screenshots/   # capturas para README
+ │   └─ src/
+ ├─ README.md
 
-TailwindCSS
 
-Axios (consumo de API REST)
+---
 
-📦 Módulos implementados
+## 🚀 Instalación y ejecución
 
-Inventario
+### Requisitos previos
 
-CRUD de productos (crear, listar, actualizar, eliminar).
+* Java 21 (JDK)
+* Maven
+* Node 18+ y npm
+* PostgreSQL
 
-Validación de stock en cada venta.
+### Clonar repositorio
 
-Caja (Punto de venta)
 
-Registro de ventas.
-
-Generación de transactionNumber único.
-
-Cálculo automático de totales.
-
-Reportes
-
-Reporte diario en JSON (endpoint REST).
-
-Exportación a CSV.
-
-Exportación a PDF.
-
-Seguridad y Roles
-
-Autenticación vía JWT.
-
-Roles:
-
-ADMIN → acceso completo a inventario, ventas, reportes y gestión de usuarios.
-
-CASHIER → acceso a ventas y consulta de inventario.
-
-Manejo de intentos de login y cierre de sesión.
-
-⚙️ Instalación y configuración
-1. Clonar el repositorio
 git clone https://github.com/Elian1509/Laindia.git
 cd Laindia
 
-2. Configurar base de datos
 
-Crear una base de datos en PostgreSQL:
+### Backend - Configurar DB
 
-# application.properties
+Editar `src/main/resources/application.properties` (o `application.yml`) con tu conexión PostgreSQL:
+
+properties
 server.port=8080
 spring.datasource.url=jdbc:postgresql://localhost:5432/LaindiaAlmuerzos
 spring.datasource.username=postgres
-spring.datasource.password=1927
+spring.datasource.password=TU_PASSWORD
 spring.datasource.driver-class-name=org.postgresql.Driver
 
-# JPA / Hibernate
 spring.jpa.hibernate.ddl-auto=none
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 
-3. Ejecutar backend
+
+> Preferible, crear la BD `LaindiaAlmuerzos` antes de arrancar.
+
+### Backend - Ejecutar
+
+Desde la carpeta raíz del backend:
+
+
 mvn spring-boot:run
 
 
-La API estará disponible en: http://localhost:8080
+La API estará en `http://localhost:8080`.
 
-4. Ejecutar frontend
+---
+
+### Frontend - Configuración y Tailwind (pasos recomendados)
+
+Ir a la carpeta frontend:
+
+
 cd frontend
+
+
+1. Instalar dependencias:
+
+
 npm install
+
+
+2. **(Recomendado)** instalar Tailwind 3 explícitamente (para evitar problemas con v4):
+
+
+npm uninstall tailwindcss @tailwindcss/postcss
+npm install -D tailwindcss@3.4.14 postcss autoprefixer
+
+
+3. Si `npx tailwindcss init -p` falla, crea manualmente los archivos en la raíz de `frontend`:
+
+`tailwind.config.js` (ESM para Vite):
+
+
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,jsx,ts,tsx}"
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+
+
+`postcss.config.js` (si Vite marca error con ESM, usar CommonJS `module.exports`):
+
+
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  }
+}
+
+
+(o si da problemas):
+
+
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  }
+}
+
+
+4. Asegúrate que `src/index.css` contiene:
+
+css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+5. Importa `index.css` en la entrada (`src/main.jsx` o `src/index.jsx`):
+
+
+import './index.css';
+
+
+6. Ejecuta frontend:
+
+
 npm run dev
 
 
-El frontend estará en: http://localhost:5173
+Normalmente disponible en `http://localhost:5173`.
 
-🔑 Autenticación (JWT)
-Login
+---
+
+## 🔐 Autenticación (JWT)
+
+### Login
+
+
 POST /api/auth/login
 
 
-Body:
+Body ejemplo:
 
-{
-  "username": "admin",
-  "password": "123456"
-}
+on
+{ "username": "admin", "password": "123456" }
 
 
 Respuesta:
 
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5..."
-}
+on
+{ "token": "eyJhbGciOi..." }
 
 
-Usar en cada request:
+Usar header en requests:
+
 
 Authorization: Bearer <token>
 
-📌 Endpoints principales
-Productos
 
-POST /api/products → Crear producto.
+---
 
-GET /api/products → Listar todos.
+## 📡 Endpoints principales (resumen)
 
-PUT /api/products/{id} → Actualizar.
+### Productos
 
-DELETE /api/products/{id} → Eliminar.
+* `POST /api/products` → Crear producto
+* `GET /api/products` → Listar productos
+* `GET /api/products/{id}` → Ver producto
+* `PUT /api/products/{id}` → Actualizar
+* `DELETE /api/products/{id}` → Eliminar
 
-Ventas
+### Ventas
 
-POST /api/sales → Registrar venta.
+* `POST /api/sales` → Registrar venta
+  Body ejemplo:
 
-Ejemplo body:
+  on
+  {
+    "userId": 1,
+    "items": [
+      { "productId": 2, "quantity": 3 },
+      { "productId": 5, "quantity": 1 }
+    ]
+  }
+  
 
+### Reportes
+
+* `GET /api/reports/daily?date=YYYY-MM-DD` → JSON
+* `GET /api/reports/daily/csv?date=YYYY-MM-DD` → CSV
+* `GET /api/reports/daily/pdf?date=YYYY-MM-DD` → PDF
+
+---
+
+## 📊 Ejemplo de respuesta del reporte (JSON)
+
+on
 {
-  "userId": 1,
+  "date": "2025-10-03",
+  "totalSales": 5,
+  "totalAmount": 41400.00,
   "items": [
-    { "productId": 2, "quantity": 3 },
-    { "productId": 5, "quantity": 1 }
+    { "productName": "Pan Integral", "quantity": 1, "total": 4200.00 },
+    { "productName": "Bananas", "quantity": 1, "total": 1800.00 }
   ]
 }
 
-Reportes
 
-GET /api/reports/daily?date=2025-10-01 → JSON.
+> Nota: el frontend adapta ese JSON para mostrar la tabla / resumen. Si tu endpoint devuelve un shape distinto, el frontend puede transformar `items` → `productsSold` como se hizo en la app.
 
-GET /api/reports/daily/csv?date=2025-10-01 → CSV.
+---
 
-GET /api/reports/daily/pdf?date=2025-10-01 → PDF.
+## 🛠️ Troubleshooting (problemas comunes)
 
-📊 Ejemplo de reporte JSON
-{
-  "date": "2025-10-01",
-  "totalSales": 2,
-  "totalAmount": 95000,
-  "items": [
-    { "productName": "Coca Cola 1.5L", "quantity": 5, "total": 25000 },
-    { "productName": "Arroz Diana 5kg", "quantity": 2, "total": 70000 }
-  ]
-}
+### `npx tailwindcss init -p` falla / error `could not determine executable to run`
 
-🧑‍🤝‍🧑 Roles y permisos
+1. Borra `node_modules` y `package-lock.json` y reinstala:
 
-ADMIN → inventario, ventas, reportes y gestión de usuarios.
+   
+   rm -rf node_modules package-lock.json
+   npm install
+   
 
-CASHIER → ventas y consulta de inventario.
+   (Windows PowerShell: `rd /s /q node_modules` y `del package-lock.json`)
 
-📝 Notas
+2. Forzar Tailwind v3:
 
-DTOs para requests/responses.
+   
+   npm uninstall tailwindcss @tailwindcss/postcss
+   npm install -D tailwindcss@3.4.14 postcss autoprefixer
+   
 
-Manejo de errores estandarizado (GlobalExceptionHandler).
+3. Si sigue fallando, crea manualmente `tailwind.config.js` y `postcss.config.js` (ver sección Frontend).
 
-Respuestas de error con formato RFC 9457.
+### 403 para usuarios `CASHIER`
 
-Frontend en React + Tailwind con consumo de endpoints.
+* Verifica que el JWT incluye el rol `CASHIER` y que tu `JwtAuthenticationFilter` construya la authority con prefijo `ROLE_` (p. ej. `ROLE_CASHIER`).
+* Asegura el orden de reglas en `SecurityConfig` (poner las reglas más específicas — p. ej. `GET /api/products/**` — antes de reglas generales).
 
-📌 Estado actual:
-✔️ Backend completo
-✔️ Frontend con login, dashboard, inventario, caja y reportes
-⚡ Estilos básicos en TailwindCSS
+### Error `Cannot read properties of undefined (reading 'toFixed')` en frontend
+
+* Significa que el backend devolvió `null`/`undefined` en algún número. Usar `Number(x || 0).toFixed(2)` o validar antes de renderizar.
+
+---
+
+## 🧪 Script para datos iniciales (opcional)
+
+Puedes crear roles y un usuario admin por API (recomendado) o con SQL manual. Ejemplo SQL básico (ajusta nombres y contraseña según tu estrategia de encriptación):
+
+
+-- crear roles (suponer tabla roles: id, name)
+INSERT INTO roles (name) VALUES ('ADMIN'), ('CASHIER');
+
+-- crear productos de ejemplo
+INSERT INTO products (sku, name, description, price, stock) VALUES
+('PAN-01', 'Pan Integral', 'Pan integral fresco', 4200, 10),
+('BAN-01', 'Bananas', 'Bananas x kg', 1800, 20);
+
+
+> Para crear el admin con contraseña hasheada usa el endpoint de creación de usuario del backend o genera el hash con BCrypt y pégalo en la DB.
+
+---
+
+## 🖼️ Capturas (agrega tus imágenes)
+
+Coloca imágenes en `frontend/public/screenshots`:
+
+* `login.png` (pantalla de inicio de sesión)
+* `dashboard.png` (panel principal)
+* `report.png` (vista de reportes)
+
+Entonces el README mostrará las capturas.
+
+---
+
+## 📌 Estado actual
+
+* Backend: completo (productos, ventas, reportes, seguridad).
+* Frontend: funcional (login, dashboard, inventario, caja, reportes).
+* Estilizado con Tailwind en progreso; ver sección troubleshooting si Tailwind no compila.
+
+---
+
+## 🤝 Contacto / notas finales
+
+Si quieres que:
+
+* Genere un script SQL más completo (usuarios + roles + productos).
+* Suba las capturas de pantalla al repo.
+* Ajuste el `README` con instrucciones para Dockerizar la app.
+
+Dime cuál y lo agrego.
+
+---
+
+**Licencia:** MIT (opcional)

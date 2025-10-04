@@ -1,7 +1,6 @@
-<<<<<<< HEAD
-
+-- ========================================
 -- Script inicial BD: Inventario y Ventas
-
+-- ========================================
 
 -- Eliminamos si existen para evitar conflictos (solo en desarrollo)
 DROP TABLE IF EXISTS sale_items CASCADE;
@@ -10,17 +9,17 @@ DROP TABLE IF EXISTS products CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS roles CASCADE;
 
-
+-- ========================================
 -- Tabla de roles
-
+-- ========================================
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL
 );
 
-
+-- ========================================
 -- Tabla de usuarios
-
+-- ========================================
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(100) UNIQUE NOT NULL,
@@ -29,9 +28,9 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
+-- ========================================
 -- Tabla de productos
-
+-- ========================================
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
     sku VARCHAR(50) UNIQUE NOT NULL,
@@ -42,9 +41,9 @@ CREATE TABLE products (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
+-- ========================================
 -- Tabla de ventas
-
+-- ========================================
 CREATE TABLE sales (
     id SERIAL PRIMARY KEY,
     transaction_number UUID DEFAULT gen_random_uuid(),
@@ -53,9 +52,9 @@ CREATE TABLE sales (
     total NUMERIC(12,2) NOT NULL CHECK (total >= 0)
 );
 
-
+-- ========================================
 -- Tabla de detalle de ventas
-
+-- ========================================
 CREATE TABLE sale_items (
     id SERIAL PRIMARY KEY,
     sale_id INT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
@@ -65,39 +64,9 @@ CREATE TABLE sale_items (
     subtotal NUMERIC(12,2) NOT NULL CHECK (subtotal >= 0)
 );
 
-
--- Tabla para registrar intentos de login 
-
-=======
--- ============================================
--- Script inicial: roles, usuarios (BCrypt), productos
--- ============================================
-
--- Roles
-INSERT INTO roles (name) VALUES ('ADMIN') ON CONFLICT (name) DO NOTHING;
-INSERT INTO roles (name) VALUES ('CASHIER') ON CONFLICT (name) DO NOTHING;
-
--- Users (REPLACE password hashes con los hashes BCrypt generados)
--- Genera los hashes con el helper Java que te doy en el README o abajo.
-INSERT INTO users (username, password, role_id, created_at)
-VALUES
-  ('admin', 'REPLACE_WITH_ADMIN_HASH', (SELECT id FROM roles WHERE name='ADMIN'), NOW())
-ON CONFLICT (username) DO NOTHING;
-
-INSERT INTO users (username, password, role_id, created_at)
-VALUES
-  ('cajero1', 'REPLACE_WITH_CASHIER_HASH', (SELECT id FROM roles WHERE name='CASHIER'), NOW())
-ON CONFLICT (username) DO NOTHING;
-
--- Productos de ejemplo
-INSERT INTO products (sku, name, description, price, stock, created_at) VALUES
-('P001','Manzanas','Manzanas rojas frescas',2500,100,NOW()),
-('P002','Bananas','Bananas maduras',1800,150,NOW()),
-('P003','Leche Entera','Bolsa de 1 litro',3200,50,NOW())
-ON CONFLICT (sku) DO NOTHING;
-
--- Tabla para registrar intentos de login (si no la tienes ya)
->>>>>>> origin/main
+-- ========================================
+-- Tabla de intentos de login
+-- ========================================
 CREATE TABLE IF NOT EXISTS login_attempts (
   id SERIAL PRIMARY KEY,
   username VARCHAR(100),
@@ -107,13 +76,9 @@ CREATE TABLE IF NOT EXISTS login_attempts (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-<<<<<<< HEAD
-`
--- Tabla para tokens revocados (logout)
-
-=======
--- Tabla para tokens revocados (logout)
->>>>>>> origin/main
+-- ========================================
+-- Tabla de tokens revocados
+-- ========================================
 CREATE TABLE IF NOT EXISTS revoked_tokens (
   id SERIAL PRIMARY KEY,
   token TEXT NOT NULL,
@@ -121,3 +86,4 @@ CREATE TABLE IF NOT EXISTS revoked_tokens (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_revoked_token_token ON revoked_tokens(token);
+

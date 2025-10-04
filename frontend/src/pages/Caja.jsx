@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getProducts, registerSale } from "../services/api";
+import { useUser } from "./useUser";
 
 export default function Caja() {
   const [products, setProducts] = useState([]);
@@ -7,6 +8,7 @@ export default function Caja() {
   const [searchTerm, setSearchTerm] = useState("");
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const { userId } = useUser();
 
   useEffect(() => {
     loadProducts();
@@ -23,8 +25,8 @@ export default function Caja() {
   }
 
   function addToCart(product) {
-    const existing = cart.find(item => item.productId === product.id);
-    
+    const existing = cart.find((item) => item.productId === product.id);
+
     if (existing) {
       // Verificar stock disponible
       if (existing.quantity >= product.stock) {
@@ -32,54 +34,59 @@ export default function Caja() {
         setTimeout(() => setError(""), 3000);
         return;
       }
-      setCart(cart.map(item => 
-        item.productId === product.id 
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
+      setCart(
+        cart.map((item) =>
+          item.productId === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      );
     } else {
       if (product.stock === 0) {
         setError(`${product.name} no tiene stock disponible`);
         setTimeout(() => setError(""), 3000);
         return;
       }
-      setCart([...cart, {
-        productId: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: 1,
-        maxStock: product.stock
-      }]);
+      setCart([
+        ...cart,
+        {
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+          maxStock: product.stock,
+        },
+      ]);
     }
   }
 
   function updateQuantity(productId, newQuantity) {
-    const item = cart.find(i => i.productId === productId);
-    
+    const item = cart.find((i) => i.productId === productId);
+
     if (newQuantity > item.maxStock) {
       setError(`Stock máximo: ${item.maxStock}`);
       setTimeout(() => setError(""), 3000);
       return;
     }
-    
+
     if (newQuantity <= 0) {
       removeFromCart(productId);
       return;
     }
-    
-    setCart(cart.map(item =>
-      item.productId === productId
-        ? { ...item, quantity: newQuantity }
-        : item
-    ));
+
+    setCart(
+      cart.map((item) =>
+        item.productId === productId ? { ...item, quantity: newQuantity } : item
+      )
+    );
   }
 
   function removeFromCart(productId) {
-    setCart(cart.filter(item => item.productId !== productId));
+    setCart(cart.filter((item) => item.productId !== productId));
   }
 
   function calculateTotal() {
-    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }
 
   async function handleCheckout() {
@@ -90,37 +97,39 @@ export default function Caja() {
     }
 
     try {
-      // Obtener userId del token
-      const token = localStorage.getItem("token");
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      
-      // Nota: El backend espera userId, pero el token tiene username
-      // Necesitarías ajustar esto según tu backend
-      const saleData = {
-        userId: 1, // Por ahora hardcodeado, idealmente obtenerlo del contexto
-        items: cart.map(item => ({
-          productId: item.productId,
-          quantity: item.quantity
-        }))
-      };
+      if (!userId){
+        throw new Error("No se puede obtener el Id")
+      }
 
-      const result = await registerSale(saleData);
-      
-      setSuccess(`Venta registrada exitosamente. Transacción #${result.transactionNumber}`);
-      setCart([]);
-      loadProducts(); // Recargar productos para actualizar stock
-      
-      setTimeout(() => setSuccess(""), 5000);
-    } catch (e) {
-      setError("Error al registrar la venta: " + e.message);
-      setTimeout(() => setError(""), 5000);
-      console.error(e);
-    }
+    const saleData = {
+      userId: userId, 
+      items: cart.map(item => ({
+        productId: item.productId,
+        quantity: item.quantity,
+      }))
+    };
+
+    console.log("Datos de venta a enviar:", saleData); // Para debug
+
+    const result = await registerSale(saleData);
+    
+    setSuccess(`Venta registrada exitosamente. Transacción #${result.transactionNumber}`);
+    setCart([]);
+    loadProducts();
+    
+    setTimeout(() => setSuccess(""), 5000);
+  } catch (e) {
+    console.error("Error detallado:", e);
+    setError("Error al registrar la venta: " + (e.message || "Error desconocido"));
+    setTimeout(() => setError(""), 5000);
   }
+}
 
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.sku.toLowerCase().includes(searchTerm.toLowerCase())
+
+  const filteredProducts = products.filter(
+    (p) =>
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -143,7 +152,7 @@ export default function Caja() {
         {/* Lista de productos */}
         <div>
           <h3 className="text-xl font-semibold mb-3">Productos Disponibles</h3>
-          
+
           <input
             type="text"
             placeholder="Buscar por nombre o SKU..."
@@ -153,7 +162,7 @@ export default function Caja() {
           />
 
           <div className="border rounded max-h-96 overflow-y-auto">
-            {filteredProducts.map(product => (
+            {filteredProducts.map((product) => (
               <div
                 key={product.id}
                 className="p-3 border-b hover:bg-gray-50 flex justify-between items-center"
@@ -163,7 +172,9 @@ export default function Caja() {
                   <p className="text-sm text-gray-600">SKU: {product.sku}</p>
                   <p className="text-sm">
                     <span className="font-semibold">${product.price}</span>
-                    <span className="text-gray-500 ml-2">Stock: {product.stock}</span>
+                    <span className="text-gray-500 ml-2">
+                      Stock: {product.stock}
+                    </span>
                   </p>
                 </div>
                 <button
@@ -185,7 +196,7 @@ export default function Caja() {
         {/* Carrito */}
         <div>
           <h3 className="text-xl font-semibold mb-3">Carrito de Compras</h3>
-          
+
           {cart.length === 0 ? (
             <div className="border rounded p-8 text-center text-gray-400">
               El carrito está vacío
@@ -193,13 +204,14 @@ export default function Caja() {
           ) : (
             <>
               <div className="border rounded mb-4 max-h-80 overflow-y-auto">
-                {cart.map(item => (
+                {cart.map((item) => (
                   <div key={item.productId} className="p-3 border-b">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
                         <p className="font-semibold">{item.name}</p>
                         <p className="text-sm text-gray-600">
-                          ${item.price} x {item.quantity} = ${item.price * item.quantity}
+                          ${item.price} x {item.quantity} = $
+                          {item.price * item.quantity}
                         </p>
                       </div>
                       <button
@@ -209,10 +221,12 @@ export default function Caja() {
                         ✕
                       </button>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                        onClick={() =>
+                          updateQuantity(item.productId, item.quantity - 1)
+                        }
                         className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300"
                       >
                         -
@@ -220,13 +234,20 @@ export default function Caja() {
                       <input
                         type="number"
                         value={item.quantity}
-                        onChange={(e) => updateQuantity(item.productId, parseInt(e.target.value) || 0)}
+                        onChange={(e) =>
+                          updateQuantity(
+                            item.productId,
+                            parseInt(e.target.value) || 0
+                          )
+                        }
                         className="border p-1 w-16 text-center rounded"
                         min="1"
                         max={item.maxStock}
                       />
                       <button
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                        onClick={() =>
+                          updateQuantity(item.productId, item.quantity + 1)
+                        }
                         className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300"
                       >
                         +
@@ -247,14 +268,14 @@ export default function Caja() {
                     ${calculateTotal().toFixed(2)}
                   </span>
                 </div>
-                
+
                 <button
                   onClick={handleCheckout}
                   className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded"
                 >
                   Finalizar Compra
                 </button>
-                
+
                 <button
                   onClick={() => setCart([])}
                   className="w-full mt-2 bg-gray-300 hover:bg-gray-400 py-2 rounded"
@@ -268,4 +289,6 @@ export default function Caja() {
       </div>
     </div>
   );
-}
+
+  }
+

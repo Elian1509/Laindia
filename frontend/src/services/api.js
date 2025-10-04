@@ -1,5 +1,4 @@
 const API_URL = "http://localhost:8080/api";
-
 // Auth
 
 export async function login(username, password) {
@@ -96,3 +95,100 @@ export async function registerSale(saleData) {
   return res.json();
 }
 
+// Reportes
+
+export async function getDailyReport(date) {
+  const res = await fetch(`${API_URL}/reports/daily?date=${date}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  if (!res.ok) throw new Error("Error al obtener reporte");
+  return res.json();
+}
+
+export async function exportReportCSV(date){
+  const res = await fetch(`${API_URL}/reports/daily/csv?date=${date}`,{
+    headers: {...getAuthHeaders()},
+  });
+  if (!res.ok) throw new Error("Error al exportar CSV");
+  const blob = await res.blob();
+
+    //descarga
+const url = window.URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `reporte_${date}.csv`; 
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}
+
+export async function exportReportPDF(date) {
+  const res = await fetch(`${API_URL}/reports/daily/pdf?date=${date}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  if (!res.ok) throw new Error("Error al exportar PDF");
+  const blob = await res.blob();
+  
+  // Descargar archivo
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `reporte_${date}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}
+
+// usuarios para admin
+
+export async function getUsers() {
+  const res = await fetch(`${API_URL}/users?param=`, {
+    headers: { ...getAuthHeaders() },
+  });
+  if (!res.ok) throw new Error("Error al obtener usuarios");
+  return res.json();
+}
+
+export async function getUserById(id) {
+  const res = await fetch(`${API_URL}/users/${id}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  if (!res.ok) throw new Error("Error al obtener usuario");
+  return res.json();
+}
+
+export async function createUser(userData) {
+  const res = await fetch(`${API_URL}/users`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+    body: JSON.stringify(userData),
+  });
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Error al crear usuario: ${error}`);
+  }
+  return res.json();
+}
+
+export async function updateUser(id, userData) {
+  const res = await fetch(`${API_URL}/users/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+    body: JSON.stringify(userData),
+  });
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Error al actualizar usuario: ${error}`);
+  }
+  return res.json();
+}
+
+export async function deleteUser(id) {
+  const res = await fetch(`${API_URL}/users/${id}`, {
+    method: "DELETE",
+    headers: { ...getAuthHeaders() },
+  });
+  if (!res.ok) throw new Error("Error al eliminar usuario");
+}

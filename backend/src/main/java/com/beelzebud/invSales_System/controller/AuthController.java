@@ -8,6 +8,8 @@ import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,18 +18,13 @@ import com.beelzebud.invSales_System.dto.response.LoginResponseDTO;
 import com.beelzebud.invSales_System.model.LoginAttempt;
 import com.beelzebud.invSales_System.model.RevokedToken;
 import com.beelzebud.invSales_System.model.User;
+import com.beelzebud.invSales_System.repository.LoginAttemptRepository;
+import com.beelzebud.invSales_System.repository.RevokedTokenRepository;
 import com.beelzebud.invSales_System.repository.UserRepository;
 import com.beelzebud.invSales_System.security.JwtUtil;
 
-import lombok.RequiredArgsConstructor;
-
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import com.beelzebud.invSales_System.repository.LoginAttemptRepository;
-import com.beelzebud.invSales_System.repository.RevokedTokenRepository;
-
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -77,7 +74,7 @@ public class AuthController {
                 .userAgent(ua)
                 .createdAt(LocalDateTime.now())
                 .build());
-        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().getName());
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().getName(), user.getId());
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 

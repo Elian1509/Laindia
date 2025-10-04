@@ -49,12 +49,12 @@ public class SecurityConfig {
                                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/auth/**").permitAll()
-                                                .requestMatchers(HttpMethod.POST, "/api/user/**").hasRole("ADMIN")
-                                                .requestMatchers("/api/products/**").hasRole("ADMIN") // CRUD
                                                 .requestMatchers(HttpMethod.GET, "/api/products/**")
                                                 .hasAnyRole("ADMIN", "CASHIER")
+                                                .requestMatchers("/api/products/**").hasRole("ADMIN") // CRUD
                                                 .requestMatchers("/api/sales/**").hasAnyRole("ADMIN", "CASHIER")
-                                                .requestMatchers("/api/reports/**").hasRole("ADMIN")
+                                                .requestMatchers("/api/reports/**").hasAnyRole("ADMIN", "CASHIER")
+                                                .requestMatchers(HttpMethod.POST, "/api/user/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
                                 .exceptionHandling(ex -> ex
                                                 .authenticationEntryPoint(customAuthHandlers) // 401

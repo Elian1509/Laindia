@@ -1,60 +1,90 @@
-# InvSales System - Prueba Tecnica
+InvSales System - Prueba Técnica
 
-Sistema de Inventario, Ventas y Reportes desarrollado con **Spring Boot 3, PostgreSQL y JWT Security** como parte de la prueba tecnica.
+Sistema de Inventario, Ventas y Reportes desarrollado como parte de la prueba técnica de Playtech.
 
----
+Incluye:
 
-## 🚀 Tecnologias utilizadas
-- Java 21
-- Spring Boot 3.5.6
-- Spring Data JPA
-- Spring Security + JWT
-- PostgreSQL
-- Maven
-- OpenPDF (para exportar reportes en PDF)
+Backend: Spring Boot 3, PostgreSQL, JWT Security.
 
----
+Frontend: React + Vite + TailwindCSS.
 
-## Modulos implementados
-1. **Inventario**  
-   - CRUD de productos (crear, listar, actualizar, eliminar).
-   
-2. **Caja**  
-   - Registro de ventas.  
-   - Validacion de stock.  
-   - Generacion de `transactionNumber` unico.  
-   - Calculo automatico de totales.  
+Autenticación y Roles: ADMIN y CASHIER.
 
-3. **Reportes**  
-   - Reporte diario en **JSON**.  
-   - Exportacion a **CSV**.  
-   - Exportacion a **PDF**.  
+🚀 Tecnologías utilizadas
+Backend
 
-4. **Seguridad**  
-   - Autenticacion con JWT.  
-   - Roles: `ADMIN` y `CASHIER`.  
-   - Acceso restringido segun permisos.  
+Java 21
 
----
+Spring Boot 3.5.6
 
-## Instalacion y configuracion
+Spring Data JPA
 
-### 1. Clonar el repositorio
+Spring Security + JWT
+
+PostgreSQL
+
+Maven
+
+OpenPDF (para exportar reportes en PDF)
+
+Frontend
+
+React 18 + Vite
+
+TailwindCSS
+
+Axios (consumo de API REST)
+
+📦 Módulos implementados
+
+Inventario
+
+CRUD de productos (crear, listar, actualizar, eliminar).
+
+Validación de stock en cada venta.
+
+Caja (Punto de venta)
+
+Registro de ventas.
+
+Generación de transactionNumber único.
+
+Cálculo automático de totales.
+
+Reportes
+
+Reporte diario en JSON (endpoint REST).
+
+Exportación a CSV.
+
+Exportación a PDF.
+
+Seguridad y Roles
+
+Autenticación vía JWT.
+
+Roles:
+
+ADMIN → acceso completo a inventario, ventas, reportes y gestión de usuarios.
+
+CASHIER → acceso a ventas y consulta de inventario.
+
+Manejo de intentos de login y cierre de sesión.
+
+⚙️ Instalación y configuración
+1. Clonar el repositorio
 git clone https://github.com/Elian1509/Laindia.git
 cd Laindia
 
-### 2. Configurar base de datos
-Crea una base de datos en PostgreSQL;
+2. Configurar base de datos
 
-# Puerto
+Crear una base de datos en PostgreSQL:
+
+# application.properties
 server.port=8080
-# Config DB PostgreSQL
-# Bd laindia en oficina o laindiaalmuerzos en casa
-spring.datasource.url=jdbc:postgresql://localhost:5432/LaindiaAlmuerzos 
-# spring.datasource.url=jdbc:postgresql://localhost:5432/Laindia 
+spring.datasource.url=jdbc:postgresql://localhost:5432/LaindiaAlmuerzos
 spring.datasource.username=postgres
 spring.datasource.password=1927
-# Driver
 spring.datasource.driver-class-name=org.postgresql.Driver
 
 # JPA / Hibernate
@@ -62,56 +92,61 @@ spring.jpa.hibernate.ddl-auto=none
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 
-
-
-### 3. Ejecutar aplicacion
+3. Ejecutar backend
 mvn spring-boot:run
 
 
-La app estara disponible en: http://localhost:8080
+La API estará disponible en: http://localhost:8080
 
----
+4. Ejecutar frontend
+cd frontend
+npm install
+npm run dev
 
-## Autenticacion (JWT)
 
-### Login
+El frontend estará en: http://localhost:5173
+
+🔑 Autenticación (JWT)
+Login
 POST /api/auth/login
+
+
 Body:
 
-```json
 {
   "username": "admin",
   "password": "123456"
 }
-```
+
+
 Respuesta:
-```json
+
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5..."
 }
-```
 
-Usa el token en cada request:
+
+Usar en cada request:
 
 Authorization: Bearer <token>
 
+📌 Endpoints principales
+Productos
 
----
+POST /api/products → Crear producto.
 
-## Endpoints principales
+GET /api/products → Listar todos.
 
-### Productos
-- `POST /api/products` → Crear producto.  
-- `GET /api/products` → Listar todos.  
-- `GET /api/products/{id}` → Buscar por ID.  
-- `PUT /api/products/{id}` → Actualizar.  
-- `DELETE /api/products/{id}` → Eliminar.  
+PUT /api/products/{id} → Actualizar.
 
-### Ventas
-- `POST /api/sales` → Registrar venta.  
+DELETE /api/products/{id} → Eliminar.
+
+Ventas
+
+POST /api/sales → Registrar venta.
 
 Ejemplo body:
-```json
+
 {
   "userId": 1,
   "items": [
@@ -119,16 +154,16 @@ Ejemplo body:
     { "productId": 5, "quantity": 1 }
   ]
 }
-```
 
-### Reportes
-- `GET /api/reports/daily?date=2025-10-01` → JSON.  
-- `GET /api/reports/daily/csv?date=2025-10-01` → CSV.  
-- `GET /api/reports/daily/pdf?date=2025-10-01` → PDF.  
+Reportes
 
+GET /api/reports/daily?date=2025-10-01 → JSON.
 
-## Ejemplo de reporte JSON
-```json
+GET /api/reports/daily/csv?date=2025-10-01 → CSV.
+
+GET /api/reports/daily/pdf?date=2025-10-01 → PDF.
+
+📊 Ejemplo de reporte JSON
 {
   "date": "2025-10-01",
   "totalSales": 2,
@@ -138,23 +173,24 @@ Ejemplo body:
     { "productName": "Arroz Diana 5kg", "quantity": 2, "total": 70000 }
   ]
 }
-```
 
----
+🧑‍🤝‍🧑 Roles y permisos
 
-## Roles
-- **ADMIN** → acceso a todos los modulos.  
-- **CASHIER** → acceso solo a ventas y consulta de inventario.  
+ADMIN → inventario, ventas, reportes y gestión de usuarios.
 
----
+CASHIER → ventas y consulta de inventario.
 
-## Notas
-- El proyecto incluye DTOs para requests/responses.  
-- Manejo de errores estandarizado con `GlobalExceptionHandler`.  
-- Reportes implementados bajo estandar **RFC 9457** para respuestas de error.  
+📝 Notas
 
----
+DTOs para requests/responses.
 
-# Estado actual
-- Backend completo (productos, ventas, reportes, seguridad).  
-- Pendiente: Frontend en React + Tailwind.  
+Manejo de errores estandarizado (GlobalExceptionHandler).
+
+Respuestas de error con formato RFC 9457.
+
+Frontend en React + Tailwind con consumo de endpoints.
+
+📌 Estado actual:
+✔️ Backend completo
+✔️ Frontend con login, dashboard, inventario, caja y reportes
+⚡ Estilos básicos en TailwindCSS
